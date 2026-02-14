@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"strconv"
+	"text/template"
 )
 
 func health(w http.ResponseWriter, r *http.Request) {
@@ -37,24 +37,22 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	homeTemplate := resolveExistingPath("ui/html/home.html", "server/ui/html/home.html")
-	if homeTemplate == "" {
-		log.Println("home template not found")
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+	files := []string{
+		"server/ui/html/pages/base.html",
+		"server/ui/html/pages/partials/nav.html",
+		"server/ui/html/pages/home.html",
 	}
 
-	ts, err := template.ParseFiles(homeTemplate)
+	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	err = ts.Execute(w, nil)
+	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
 	}
 }
