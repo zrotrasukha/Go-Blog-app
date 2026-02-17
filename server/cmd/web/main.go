@@ -30,7 +30,7 @@ func openDB(dsn string) (*sql.DB, error) {
 }
 
 func main() {
-	addr := flag.String("addr", ":8000", "HTTP networ address")
+	addr := flag.String("addr", ":8000", "HTTP network address")
 	dsn := flag.String("dsn", "postgres://web:webp@localhost/blogs?sslmode=disable", "PostgreSQL data source name")
 
 	flag.Parse()
