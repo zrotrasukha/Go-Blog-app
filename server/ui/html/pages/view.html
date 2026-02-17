@@ -1,0 +1,18 @@
+{{define "title"}} View Blog #{{.Blog.ID}} {{end}}
+
+{{define "main"}}
+    {{with .Blog}}
+        <div class="blog">
+            <div class="metadata">
+                <strong>{{.Title}}</strong>
+                <span>#{{.ID}} by {{.Author}}</span>
+            </div>
+            <pre><code>{{.Content}} </code></pre>
+            <div class="metadata">
+                <time>Created: {{.CreatedAt}}</time>
+                <time>Expires: {{.Expires}}</time>
+                <div></div>
+            </div>
+        </div>
+    {{end}}
+{{end}}
