@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 
@@ -28,7 +30,28 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", b)
+	files := []string{
+		"ui/html/pages/base.html",
+		"ui/html/pages/partials/nav.html",
+		"ui/html/pages/view.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", b)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+			return
+		} else {
+			app.serverError(w, err)
+			return
+		}
+	}
 }
 
 func (app *application) blogCreate(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +87,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for blog := range blogs {
+	for _, blog := range blogs {
 		fmt.Fprintf(w, "%+v\n", blog)
 	}
 	// files := []string{
