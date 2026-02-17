@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -36,21 +35,19 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 		"ui/html/pages/view.html",
 	}
 
+	data := &templateData{
+		Blog: b,
+	}
+
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	err = ts.ExecuteTemplate(w, "base", b)
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		if errors.Is(err, models.ErrNoRecord) {
-			app.notFound(w)
-			return
-		} else {
-			app.serverError(w, err)
-			return
-		}
+		app.serverError(w, err)
 	}
 }
 
@@ -87,24 +84,24 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, blog := range blogs {
-		fmt.Fprintf(w, "%+v\n", blog)
+	files := []string{
+		"ui/html/pages/base.html",
+		"ui/html/pages/partials/nav.html",
+		"ui/html/pages/home.html",
 	}
-	// files := []string{
-	// 	"ui/html/pages/base.html",
-	// 	"ui/html/pages/partials/nav.html",
-	// 	"ui/html/pages/home.html",
-	// }
-	//
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// 	return
-	// }
-	//
-	// err = ts.ExecuteTemplate(w, "base", nil)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// }
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	data := &templateData{
+		Blogs: blogs,
+	}
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
 }
