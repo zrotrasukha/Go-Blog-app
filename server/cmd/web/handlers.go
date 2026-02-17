@@ -64,7 +64,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, blog := range blogs {
+	for blog := range blogs {
 		fmt.Fprintf(w, "%+v\n", blog)
 	}
 	// files := []string{
