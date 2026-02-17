@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
@@ -29,26 +28,10 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"ui/html/pages/base.html",
-		"ui/html/pages/partials/nav.html",
-		"ui/html/pages/view.html",
-	}
-
-	data := &templateData{
+	app.render(w, http.StatusOK, "view.html", &templateData{
 		Blog: b,
-	}
+	})
 
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-	}
 }
 
 func (app *application) blogCreate(w http.ResponseWriter, r *http.Request) {
@@ -84,24 +67,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"ui/html/pages/base.html",
-		"ui/html/pages/partials/nav.html",
-		"ui/html/pages/home.html",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	data := &templateData{
+	app.render(w, http.StatusOK, "home.html", &templateData{
 		Blogs: blogs,
-	}
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
+	})
 }
