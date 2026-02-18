@@ -13,10 +13,10 @@ import (
 )
 
 type application struct {
-	errorlog  *log.Logger
-	infolog   *log.Logger
-	blog      *models.BlogModel
-	templates map[string]*template.Template
+	errorlog      *log.Logger
+	infolog       *log.Logger
+	blog          *models.BlogModel
+	templateCache map[string]*template.Template
 }
 
 func openDB(dsn string) (*sql.DB, error) {
@@ -53,10 +53,10 @@ func main() {
 	}
 
 	app := &application{
-		errorlog:  errorLog,
-		infolog:   infoLog,
-		blog:      &models.BlogModel{DB: db},
-		templates: templateCache,
+		errorlog:      errorLog,
+		infolog:       infoLog,
+		blog:          &models.BlogModel{DB: db},
+		templateCache: templateCache,
 	}
 	srv := &http.Server{
 		Addr:     *addr,
