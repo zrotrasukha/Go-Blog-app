@@ -12,7 +12,7 @@
         {{range .Blogs}}
         <tr>
             <td><a href="/blog/view?id={{.ID}}">{{.Title}}</a></td>
-            <td>{{.CreatedAt}}</td>
+            <td>{{humanDate .CreatedAt}}</td>
             <td>#{{.ID}}</td>
         </tr>
         {{end}}
