@@ -28,9 +28,9 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.render(w, http.StatusOK, "view.html", &templateData{
-		Blog: b,
-	})
+	data := app.newSnippetData()
+	data.Blog = b
+	app.render(w, http.StatusOK, "view.html", data)
 
 }
 
@@ -66,8 +66,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+	data := app.newSnippetData()
+	data.Blogs = blogs
 
-	app.render(w, http.StatusOK, "home.html", &templateData{
-		Blogs: blogs,
-	})
+	app.render(w, http.StatusOK, "home.html", data)
 }
