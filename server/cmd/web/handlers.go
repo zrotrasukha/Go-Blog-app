@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/zrotrasukha/Go-Blog-app/internal/models"
 )
 
@@ -12,8 +13,10 @@ func health(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Everything is alright"))
 }
 func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil {
+
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil || id < 1 {
 		app.notFound(w)
 		return
 	}
@@ -28,23 +31,36 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := app.newSnippetData()
+	data := app.newTemplateData()
 	data.Blog = b
-	app.render(w, http.StatusOK, "view.html", data)
 
+	app.render(w, http.StatusOK, "view.html", data)
 }
 
+// for displaying the form to create a new blog
 func (app *application) blogCreate(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
-		app.clientError(w, http.StatusMethodNotAllowed)
+	data := app.newTemplateData()
+
+	app.render(w, http.StatusOK, "create.html", data)
+}
+
+// for creating the post
+func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	title := "O snail"
-	content := "O snail Climb Mount Fuji, But slowly, slowly! O snail Climb Mount Fuji, And be happy!"
-	author := "Yosa Buson"
-	expires := 7
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	author := r.Form.Get("author")
+	expires, err := strconv.Atoi(r.Form.Get("expires"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
 	id, err := app.blog.Insert(title, content, author, expires)
 	if err != nil {
@@ -52,21 +68,17 @@ func (app *application) blogCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/blog/view?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/blog/view/%d", id), http.StatusSeeOther)
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
 
 	blogs, err := app.blog.Latest()
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-	data := app.newSnippetData()
+	data := app.newTemplateData()
 	data.Blogs = blogs
 
 	app.render(w, http.StatusOK, "home.html", data)
