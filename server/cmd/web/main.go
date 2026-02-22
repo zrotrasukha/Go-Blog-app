@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/zrotrasukha/Go-Blog-app/internal/models"
 )
@@ -32,8 +33,20 @@ func openDB(dsn string) (*sql.DB, error) {
 }
 
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	neon_dsn := os.Getenv("NEON_USER_DSN")
+	if neon_dsn == "" {
+		log.Fatal("NEON_DSN environment variable is not set")
+	}
+
 	addr := flag.String("addr", ":8000", "HTTP network address")
-	dsn := flag.String("dsn", "postgres://web:webp@localhost/blogs?sslmode=disable", "PostgreSQL data source name")
+	dsn := flag.String("dsn", neon_dsn, "PostgreSQL data source name")
+	// dsn := flag.String("dsn", "postgres://web:webp@localhost/blogs?sslmode=disable", "PostgreSQL data source name")
 
 	flag.Parse()
 
