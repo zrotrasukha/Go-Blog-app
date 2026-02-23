@@ -1,3 +1,4 @@
 temp.sql
 .env
 bin/
+tmp/
