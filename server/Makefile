@@ -5,11 +5,11 @@ CMD_DIR=./cmd/web/*
 .PHONY: build run clean
 
 build:
-	mkdir -p $(BIN_DIR)
-	go build -o $(BIN_DIR)/$(APP_NAME) $(CMD_DIR)
+	@mkdir -p $(BIN_DIR)
+	@go build -o $(BIN_DIR)/$(APP_NAME) $(CMD_DIR)
 
 run: build
-	./$(BIN_DIR)/$(APP_NAME)
+	@air -c .air.toml
 
 clean:
-	rm -rf $(BIN_DIR)
+	@rm -rf $(BIN_DIR)
