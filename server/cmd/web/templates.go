@@ -12,6 +12,7 @@ type templateData struct {
 	Blog        *models.Blog
 	Blogs       []*models.Blog
 	CurrentYear int
+	Form        any
 }
 
 func humanDate(t time.Time) string {

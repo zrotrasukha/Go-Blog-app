@@ -4,21 +4,33 @@
     <form action="/blog/create" method="POST">
         <div>
             <label>Title:</label>
+            {{with .Form.FieldError.title}}
+                <label class="error">{{.}}</label>
+            {{end}}
             <input type="text" name='title'>
         </div>
         <div>
             <label>Author:</label>
+            {{with .Form.FieldError.author}}
+                <label class="error">{{.}}</label>
+            {{end}}
             <input type="text" name='author'>
         </div>
         <div>
             <label>Content:</label>
+            {{with .Form.FieldError.content}}
+                <label class="error">{{.}}</label>
+            {{end}}
             <textarea name="content" name='content'></textarea>
         </div>
         <div>
             <label>Delete In:</label>
-            <input type='radio' name='expires' value='365' checked> One Year
-            <input type='radio' name='expires' value='7'> One Week
-            <input type='radio' name='expires' value='1'> One Day
+            {{with .Form.FieldError.expires}}
+                <label class="error">{{.}}</label>
+            {{end}}
+        <input type='radio' name='expires' value='365' {{if (eq .Form.Expires 365)}}checked{{end}}> One Year
+            <input type='radio' name='expires' value='7' {{if (eq .Form.Expires 7)}}checked{{end}}> One Week
+            <input type='radio' name='expires' value='1' {{if (eq .Form.Expires 1)}}checked{{end}}> One Day
         </div>
         <div>
             <input type="submit" value='Publish Blog'>

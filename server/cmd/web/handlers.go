@@ -4,10 +4,20 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/zrotrasukha/Go-Blog-app/internal/models"
 )
+
+type blogCreateForm struct {
+	Title      string
+	Content    string
+	Author     string
+	Expires    int
+	FieldError map[string]string
+}
 
 func health(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Everything is alright"))
@@ -40,7 +50,9 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 // for displaying the form to create a new blog
 func (app *application) blogCreate(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData()
-
+	data.Form = blogCreateForm{
+		Expires: 365,
+	}
 	app.render(w, http.StatusOK, "create.html", data)
 }
 
@@ -53,16 +65,49 @@ func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	title := r.PostForm.Get("title")
-	content := r.PostForm.Get("content")
-	author := r.Form.Get("author")
 	expires, err := strconv.Atoi(r.Form.Get("expires"))
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	id, err := app.blog.Insert(title, content, author, expires)
+	// validation
+	form := blogCreateForm{
+		Title:      r.PostForm.Get("title"),
+		Content:    r.PostForm.Get("content"),
+		Author:     r.PostForm.Get("author"),
+		Expires:    expires,
+		FieldError: make(map[string]string),
+	}
+
+	if strings.TrimSpace(form.Title) == "" {
+		form.FieldError["title"] = "Title is required"
+	} else if utf8.RuneCountInString(form.Title) > 100 {
+		form.FieldError["title"] = "Title must not exceed 100 characters"
+	}
+
+	if strings.TrimSpace(form.Content) == "" {
+		form.FieldError["content"] = "Content is required"
+	}
+
+	if strings.TrimSpace(form.Content) == "" {
+		form.FieldError["author"] = "Author is required"
+	} else if utf8.RuneCountInString(form.Author) > 50 {
+		form.FieldError["author"] = "Author must not exceed 50 characters"
+	}
+
+	if expires != 1 && expires != 7 && expires != 365 {
+		form.FieldError["expires"] = "Expires must be 1, 7, or 365"
+	}
+
+	if len(form.FieldError) > 0 {
+		data := app.newTemplateData()
+		data.Form = form
+		app.render(w, http.StatusUnprocessableEntity, "create.html", data)
+		return
+	}
+
+	id, err := app.blog.Insert(form.Title, form.Content, form.Author, form.Expires)
 	if err != nil {
 		app.serverError(w, err)
 		return
