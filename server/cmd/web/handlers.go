@@ -11,11 +11,11 @@ import (
 )
 
 type blogCreateForm struct {
-	Title   string
-	Content string
-	Author  string
-	Expires int
-	validator.Validator
+	Title               string `form:"title"`
+	Content             string `form:"content"`
+	Author              string `form:"author"`
+	Expires             int    `form:"expires"`
+	validator.Validator `form:"-"`
 }
 
 func health(w http.ResponseWriter, r *http.Request) {
@@ -57,25 +57,11 @@ func (app *application) blogCreate(w http.ResponseWriter, r *http.Request) {
 
 // for creating the post
 func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
-
-	err := r.ParseForm()
+	var form blogCreateForm
+	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
-	}
-
-	expires, err := strconv.Atoi(r.Form.Get("expires"))
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	// validation
-	form := blogCreateForm{
-		Title:   r.PostForm.Get("title"),
-		Content: r.PostForm.Get("content"),
-		Author:  r.PostForm.Get("author"),
-		Expires: expires,
 	}
 
 	form.CheckField(form.NotBlank(form.Title), "title", "This field cannot be blank")

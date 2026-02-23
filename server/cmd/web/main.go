@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-playground/form"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/zrotrasukha/Go-Blog-app/internal/models"
@@ -18,6 +19,7 @@ type application struct {
 	infolog       *log.Logger
 	blog          *models.BlogModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func openDB(dsn string) (*sql.DB, error) {
@@ -64,11 +66,13 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	formDecoder := form.NewDecoder()
 	app := &application{
 		errorlog:      errorLog,
 		infolog:       infoLog,
 		blog:          &models.BlogModel{DB: db},
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 	srv := &http.Server{
 		Addr:     *addr,

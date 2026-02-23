@@ -8,3 +8,5 @@ require (
 	github.com/justinas/alice v1.2.0
 	github.com/lib/pq v1.11.2
 )
+
+require github.com/go-playground/form v3.1.4+incompatible // indirect
