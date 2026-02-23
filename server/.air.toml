@@ -1,0 +1,8 @@
+root = "."
+tmp_dir = "tmp"
+
+env_file = [".env"]
+
+[build]
+    cmd = "make build"
+    bin = "./bin/web"
