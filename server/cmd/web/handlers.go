@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/zrotrasukha/Go-Blog-app/internal/models"
+	"github.com/zrotrasukha/Go-Blog-app/internal/validator"
 )
 
 type blogCreateForm struct {
-	Title      string
-	Content    string
-	Author     string
-	Expires    int
-	FieldError map[string]string
+	Title   string
+	Content string
+	Author  string
+	Expires int
+	validator.Validator
 }
 
 func health(w http.ResponseWriter, r *http.Request) {
@@ -73,34 +72,20 @@ func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	// validation
 	form := blogCreateForm{
-		Title:      r.PostForm.Get("title"),
-		Content:    r.PostForm.Get("content"),
-		Author:     r.PostForm.Get("author"),
-		Expires:    expires,
-		FieldError: make(map[string]string),
+		Title:   r.PostForm.Get("title"),
+		Content: r.PostForm.Get("content"),
+		Author:  r.PostForm.Get("author"),
+		Expires: expires,
 	}
 
-	if strings.TrimSpace(form.Title) == "" {
-		form.FieldError["title"] = "Title is required"
-	} else if utf8.RuneCountInString(form.Title) > 100 {
-		form.FieldError["title"] = "Title must not exceed 100 characters"
-	}
+	form.CheckField(form.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(form.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	form.CheckField(form.NotBlank(form.Content), "content", "This field cannot be blank")
+	form.CheckField(form.NotBlank(form.Author), "author", "This field cannot be blank")
+	form.CheckField(form.MaxChars(form.Author, 50), "author", "This field cannot be more than 50 characters long")
+	form.CheckField(form.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must be equal to 1, 7 or 365")
 
-	if strings.TrimSpace(form.Content) == "" {
-		form.FieldError["content"] = "Content is required"
-	}
-
-	if strings.TrimSpace(form.Content) == "" {
-		form.FieldError["author"] = "Author is required"
-	} else if utf8.RuneCountInString(form.Author) > 50 {
-		form.FieldError["author"] = "Author must not exceed 50 characters"
-	}
-
-	if expires != 1 && expires != 7 && expires != 365 {
-		form.FieldError["expires"] = "Expires must be 1, 7, or 365"
-	}
-
-	if len(form.FieldError) > 0 {
+	if !form.Valid() {
 		data := app.newTemplateData()
 		data.Form = form
 		app.render(w, http.StatusUnprocessableEntity, "create.html", data)
