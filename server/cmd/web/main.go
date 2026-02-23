@@ -39,14 +39,13 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	neon_dsn := os.Getenv("NEON_USER_DSN")
-	if neon_dsn == "" {
+	main_dsn := os.Getenv("MAIN_DSN")
+	if main_dsn == "" {
 		log.Fatal("NEON_DSN environment variable is not set")
 	}
 
 	addr := flag.String("addr", ":8000", "HTTP network address")
-	dsn := flag.String("dsn", neon_dsn, "PostgreSQL data source name")
-	// dsn := flag.String("dsn", "postgres://web:webp@localhost/blogs?sslmode=disable", "PostgreSQL data source name")
+	dsn := flag.String("dsn", main_dsn, "PostgreSQL data source name")
 
 	flag.Parse()
 
