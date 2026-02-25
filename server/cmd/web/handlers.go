@@ -40,18 +40,15 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	flash := app.sessionManager.PopString(r.Context(), "flash")
-
-	data := app.newTemplateData()
+	data := app.newTemplateData(r)
 	data.Blog = b
-	data.Flash = flash
 
 	app.render(w, http.StatusOK, "view.html", data)
 }
 
 // for displaying the form to create a new blog
 func (app *application) blogCreate(w http.ResponseWriter, r *http.Request) {
-	data := app.newTemplateData()
+	data := app.newTemplateData(r)
 	data.Form = blogCreateForm{
 		Expires: 365,
 	}
@@ -75,7 +72,7 @@ func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(form.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must be equal to 1, 7 or 365")
 
 	if !form.Valid() {
-		data := app.newTemplateData()
+		data := app.newTemplateData(r)
 		data.Form = form
 		app.render(w, http.StatusUnprocessableEntity, "create.html", data)
 		return
@@ -98,7 +95,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
-	data := app.newTemplateData()
+	data := app.newTemplateData(r)
 	data.Blogs = blogs
 
 	app.render(w, http.StatusOK, "home.html", data)
