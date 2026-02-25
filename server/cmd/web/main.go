@@ -7,7 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/postgresstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -15,11 +18,12 @@ import (
 )
 
 type application struct {
-	errorlog      *log.Logger
-	infolog       *log.Logger
-	blog          *models.BlogModel
-	templateCache map[string]*template.Template
-	formDecoder   *form.Decoder
+	errorlog       *log.Logger
+	infolog        *log.Logger
+	blog           *models.BlogModel
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func openDB(dsn string) (*sql.DB, error) {
@@ -67,13 +71,19 @@ func main() {
 	}
 
 	formDecoder := form.NewDecoder()
+	sessionManager := scs.New()
+	sessionManager.Store = postgresstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+
 	app := &application{
-		errorlog:      errorLog,
-		infolog:       infoLog,
-		blog:          &models.BlogModel{DB: db},
-		templateCache: templateCache,
-		formDecoder:   formDecoder,
+		errorlog:       errorLog,
+		infolog:        infoLog,
+		blog:           &models.BlogModel{DB: db},
+		templateCache:  templateCache,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
 	}
+
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,

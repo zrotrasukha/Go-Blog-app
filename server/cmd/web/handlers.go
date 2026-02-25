@@ -40,8 +40,11 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flash := app.sessionManager.PopString(r.Context(), "flash")
+
 	data := app.newTemplateData()
 	data.Blog = b
+	data.Flash = flash
 
 	app.render(w, http.StatusOK, "view.html", data)
 }
@@ -83,6 +86,7 @@ func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+	app.sessionManager.Put(r.Context(), "flash", "Blog post successfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/blog/view/%d", id), http.StatusSeeOther)
 }
