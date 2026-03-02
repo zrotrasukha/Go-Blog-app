@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"regexp"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -10,11 +11,13 @@ type Validator struct {
 	FieldError map[string]string
 }
 
+var EmailRX = regexp.MustCompile(`^[a-zA-Z0-9.!#$%&'*+/=?^_` + "`" + `{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$`)
+
 func (v *Validator) Valid() bool {
 	return len(v.FieldError) == 0
 }
 
-func (v *Validator) AddError(key, error string) {
+func (v *Validator) AddFieldError(key, error string) {
 	if v.FieldError == nil {
 		v.FieldError = make(map[string]string)
 	}
@@ -26,21 +29,29 @@ func (v *Validator) AddError(key, error string) {
 
 func (v *Validator) CheckField(ok bool, key, error string) {
 	if !ok {
-		v.AddError(key, error)
+		v.AddFieldError(key, error)
 	}
 }
 
-func (v *Validator) NotBlank(value string) bool {
+func NotBlank(value string) bool {
 	return strings.TrimSpace(value) != ""
 }
 
-func (v *Validator) MaxChars(value string, n int) bool {
+func MaxChars(value string, n int) bool {
 	return utf8.RuneCountInString(value) <= n
 }
 
-func (v *Validator) PermittedInt(value int, permittedValues ...int) bool {
+func PermittedInt(value int, permittedValues ...int) bool {
 	if slices.Contains(permittedValues, value) {
 		return true
 	}
 	return false
+}
+
+func MinChars(value string, n int) bool {
+	return utf8.RuneCountInString(value) >= n
+}
+
+func Matches(value string, rx *regexp.Regexp) bool {
+	return rx.MatchString(value)
 }
