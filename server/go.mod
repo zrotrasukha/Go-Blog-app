@@ -10,6 +10,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/justinas/alice v1.2.0
 	github.com/lib/pq v1.11.2
+	golang.org/x/crypto v0.48.0
 )
 
 require gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
