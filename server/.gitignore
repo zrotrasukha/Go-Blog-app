@@ -2,3 +2,5 @@ temp.sql
 .env
 bin/
 tmp/
+vendor/
+tls/
