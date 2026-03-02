@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -18,6 +19,13 @@ type blogCreateForm struct {
 	validator.Validator `form:"-"`
 }
 
+type userSignupForm struct {
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
 func health(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Everything is alright"))
 }
@@ -30,7 +38,7 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := app.blog.Get(id)
+	b, err := app.blogs.Get(id)
 	if err != nil {
 		if err == models.ErrNoRecord {
 			app.notFound(w)
@@ -46,7 +54,7 @@ func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "view.html", data)
 }
 
-// for displaying the form to create a new blog
+// send blog create form
 func (app *application) blogCreate(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Form = blogCreateForm{
@@ -55,7 +63,7 @@ func (app *application) blogCreate(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "create.html", data)
 }
 
-// for creating the post
+// create blog
 func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
 	var form blogCreateForm
 	err := app.decodePostForm(r, &form)
@@ -64,12 +72,12 @@ func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form.CheckField(form.NotBlank(form.Title), "title", "This field cannot be blank")
-	form.CheckField(form.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
-	form.CheckField(form.NotBlank(form.Content), "content", "This field cannot be blank")
-	form.CheckField(form.NotBlank(form.Author), "author", "This field cannot be blank")
-	form.CheckField(form.MaxChars(form.Author, 50), "author", "This field cannot be more than 50 characters long")
-	form.CheckField(form.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must be equal to 1, 7 or 365")
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be blank")
+	form.CheckField(validator.NotBlank(form.Author), "author", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Author, 50), "author", "This field cannot be more than 50 characters long")
+	form.CheckField(validator.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must be equal to 1, 7 or 365")
 
 	if !form.Valid() {
 		data := app.newTemplateData(r)
@@ -78,7 +86,7 @@ func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := app.blog.Insert(form.Title, form.Content, form.Author, form.Expires)
+	id, err := app.blogs.Insert(form.Title, form.Content, form.Author, form.Expires)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -88,9 +96,61 @@ func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/blog/view/%d", id), http.StatusSeeOther)
 }
 
+func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = userSignupForm{}
+	app.render(w, http.StatusOK, "signup.html", data)
+}
+func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
+	var form *userSignupForm
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	form.CheckField(validator.NotBlank(form.Name), "name", "This field cannot be blank")
+	form.CheckField(validator.NotBlank(form.Email), "name", "This field cannot be blank")
+	form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be a valid email address")
+	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank") // TODO: add a password regex
+	form.CheckField(validator.MinChars(form.Password, 8), "password", "This field must be at least 8 characters long")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, http.StatusUnprocessableEntity, "signup.html", data)
+		return
+	}
+
+	err = app.users.Insert(form.Name, form.Email, form.Password)
+	if err != nil {
+		if errors.Is(err, models.ErrDuplicateEmail) {
+			form.AddFieldError("email", "Address is already in use")
+
+			data := app.newTemplateData(r)
+			data.Form = form
+			app.render(w, http.StatusUnprocessableEntity, "signup.html", data)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
+
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+}
+func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Display a HTML form for logging in a user...")
+}
+func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Authenticate the user...")
+}
+func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Log out the user...")
+}
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
-	blogs, err := app.blog.Latest()
+	blogs, err := app.blogs.Latest()
 	if err != nil {
 		app.serverError(w, err)
 		return
