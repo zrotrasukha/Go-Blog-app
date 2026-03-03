@@ -18,13 +18,22 @@ func (app *application) routes() http.Handler {
 	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fileServer))
 	router.HandlerFunc(http.MethodGet, "/health", health)
 
+	// unpropected
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
-
 	router.Handler(http.MethodGet, "/", dynamic.ThenFunc(app.home))
 	router.Handler(http.MethodGet, "/blog/view/:id", dynamic.ThenFunc(app.blogView))
-	router.Handler(http.MethodGet, "/blog/create", dynamic.ThenFunc(app.blogCreate))
-	router.Handler(http.MethodPost, "/blog/create", dynamic.ThenFunc(app.blogCreatePost))
+	router.Handler(http.MethodGet, "/user/signup", dynamic.ThenFunc(app.userSignup))
+	router.Handler(http.MethodPost, "/user/signup", dynamic.ThenFunc(app.userSignupPost))
+	router.Handler(http.MethodGet, "/user/login", dynamic.ThenFunc(app.userLogin))
+	router.Handler(http.MethodPost, "/user/login", dynamic.ThenFunc(app.userLoginPost))
 
+	// protected
+	protected := dynamic.Append(app.requireAuthentication)
+	router.Handler(http.MethodGet, "/blog/create", protected.ThenFunc(app.blogCreate))
+	router.Handler(http.MethodPost, "/blog/create", protected.ThenFunc(app.blogCreatePost))
+	router.Handler(http.MethodPost, "/user/logout", protected.ThenFunc(app.userLogoutPost))
+
+	// middleware chains
 	standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 	return standard.Then(router)
 }
