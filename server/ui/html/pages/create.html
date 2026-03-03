@@ -4,28 +4,28 @@
     <form action="/blog/create" method="POST">
         <div>
             <label>Title:</label>
-            {{with .Form.FieldError.title}}
+            {{with .Form.FieldErrors.title}}
                 <label class="error">{{.}}</label>
             {{end}}
             <input type="text" name='title'>
         </div>
         <div>
             <label>Author:</label>
-            {{with .Form.FieldError.author}}
+            {{with .Form.FieldErrors.author}}
                 <label class="error">{{.}}</label>
             {{end}}
             <input type="text" name='author'>
         </div>
         <div>
             <label>Content:</label>
-            {{with .Form.FieldError.content}}
+            {{with .Form.FieldErrors.content}}
                 <label class="error">{{.}}</label>
             {{end}}
             <textarea name="content" name='content'></textarea>
         </div>
         <div>
             <label>Delete In:</label>
-            {{with .Form.FieldError.expires}}
+            {{with .Form.FieldErrors.expires}}
                 <label class="error">{{.}}</label>
             {{end}}
         <input type='radio' name='expires' value='365' {{if (eq .Form.Expires 365)}}checked{{end}}> One Year
