@@ -83,7 +83,7 @@ func (app *application) blogCreatePost(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be blank")
 	form.CheckField(validator.NotBlank(form.Author), "author", "This field cannot be blank")
 	form.CheckField(validator.MaxChars(form.Author, 50), "author", "This field cannot be more than 50 characters long")
-	form.CheckField(validator.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must be equal to 1, 7 or 365")
+	form.CheckField(validator.PermitedValue(form.Expires, 1, 7, 365), "expires", "This field must be equal to 1, 7 or 365")
 
 	if !form.Valid() {
 		data := app.newTemplateData(r)

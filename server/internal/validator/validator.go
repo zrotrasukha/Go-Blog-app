@@ -46,8 +46,8 @@ func MaxChars(value string, n int) bool {
 	return utf8.RuneCountInString(value) <= n
 }
 
-func PermittedInt(value int, permittedValues ...int) bool {
-	if slices.Contains(permittedValues, value) {
+func PermitedValue[T comparable](value T, permittedValue ...T) bool {
+	if slices.Contains(permittedValue, value) {
 		return true
 	}
 	return false
