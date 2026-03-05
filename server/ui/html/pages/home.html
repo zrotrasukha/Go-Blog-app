@@ -3,22 +3,21 @@
 {{define "main"}}
     <h2>Latest Blogs</h2>
     {{if .Blogs}}
-    <table>
-        <tr>
-            <th>Title</th>
-            <th>Created</th>
-            <th>ID</th>
-        </tr>
-        {{range .Blogs}}
-        <tr>
-            <td><a href="/blog/view{{.ID}}">{{.Title}}</a></td>
-            <td>{{humanDate .CreatedAt}}</td>
-            <td>#{{.ID}}</td>
-        </tr>
-        {{end}}
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Created</th>
+                <th>ID</th>
+            </tr>
+            {{range .Blogs}}
+            <tr>
+                <td><a href="/blog/view{{.ID}}">{{.Title}}</a></td>
+                <td>{{humanDate .CreatedAt}}</td>
+                <td>#{{.ID}}</td>
+            </tr>
+            {{end}}
         </table>
     {{else}}
         <p>There's nothing to see here... yet!</p>
     {{end}}
 {{end}}
-
