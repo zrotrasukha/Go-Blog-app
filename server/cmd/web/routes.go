@@ -19,7 +19,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/health", health)
 
 	// unpropected
-	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf)
+	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
 	router.Handler(http.MethodGet, "/", dynamic.ThenFunc(app.home))
 	router.Handler(http.MethodGet, "/blog/view/:id", dynamic.ThenFunc(app.blogView))
 	router.Handler(http.MethodGet, "/user/signup", dynamic.ThenFunc(app.userSignup))
