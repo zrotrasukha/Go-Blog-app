@@ -46,7 +46,7 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 			return
 		}
 
-		w.Header().Add("Cache-Control", "no-store")
+		w.Header().Add("Cache-Control", "no-store") // prevent caching of protected pages
 		next.ServeHTTP(w, r)
 	})
 
