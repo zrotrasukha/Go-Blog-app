@@ -33,7 +33,7 @@ type userLoginForm struct {
 }
 
 func health(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Everything is alright"))
+	w.Write([]byte("OK"))
 }
 func (app *application) blogView(w http.ResponseWriter, r *http.Request) {
 
