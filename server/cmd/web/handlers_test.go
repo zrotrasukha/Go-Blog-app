@@ -82,13 +82,12 @@ func TestUserSignup(t *testing.T) {
 
 	_, _, body := ts.get(t, "/user/signup")
 	validCSRFToken := extractCSRFToken(t, body)
-	t.Logf("Valid CSRF Token: %s", validCSRFToken)
 
 	const (
 		validName     = "Shivang"
 		validPassword = "validpa$$word"
-		validEmail    = "shiv@gmail.com"
-		formTag       = `<form action="/user/signup" method="POST" novalidate>`
+		validEmail    = "shiy@gmail.com"
+		formTag       = "<form action='/user/signup' method='POST' novalidate>"
 	)
 	tests := []struct {
 		name         string
@@ -115,12 +114,12 @@ func TestUserSignup(t *testing.T) {
 			wantCode:     http.StatusBadRequest,
 		},
 		{
-			name:         "Empty namme",
+			name:         "Empty name",
 			username:     "",
 			userEmail:    validEmail,
 			userPassword: validPassword,
 			csrfToken:    validCSRFToken,
-			wantCode:     http.StatusSeeOther,
+			wantCode:     http.StatusUnprocessableEntity,
 			wantFormTag:  formTag,
 		},
 		{
@@ -147,14 +146,14 @@ func TestUserSignup(t *testing.T) {
 			userEmail:    "shiv@gmail",
 			userPassword: validPassword,
 			csrfToken:    validCSRFToken,
-			wantCode:     http.StatusSeeOther,
+			wantCode:     http.StatusUnprocessableEntity,
 			wantFormTag:  formTag,
 		},
 		{
 			name:         "Short password",
 			username:     validName,
-			userEmail:    "",
-			userPassword: validPassword,
+			userEmail:    validEmail,
+			userPassword: "short",
 			csrfToken:    validCSRFToken,
 			wantCode:     http.StatusUnprocessableEntity,
 			wantFormTag:  formTag,
@@ -177,10 +176,6 @@ func TestUserSignup(t *testing.T) {
 			form.Add("email", tt.userEmail)
 			form.Add("password", tt.userPassword)
 			form.Add("csrf_token", tt.csrfToken)
-			t.Logf("Form name: %v", form["name"])
-			t.Logf("Form email: %v", form["email"])
-			t.Logf("Form password: %v", form["password"])
-			t.Logf("Form csrf_token: %v", form["csrf_token"])
 
 			code, _, body := ts.postForm(t, "/user/signup", form)
 
