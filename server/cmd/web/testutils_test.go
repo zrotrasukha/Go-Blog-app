@@ -19,7 +19,15 @@ import (
 )
 
 func (ts *testServer) postForm(t *testing.T, urlPath string, formData url.Values) (int, http.Header, string) {
-	rs, err := ts.Client().PostForm(ts.URL+urlPath, formData)
+	req, err := http.NewRequest(http.MethodPost, ts.URL+urlPath, bytes.NewBufferString(formData.Encode()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Referer", ts.URL+urlPath)
+
+	rs, err := ts.Client().Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +45,7 @@ func (ts *testServer) postForm(t *testing.T, urlPath string, formData url.Values
 var csrfRGXExp = regexp.MustCompile(`name=['"]csrf_token['"][^>]*value=['"]([^'"]+)['"]`)
 
 func extractCSRFToken(t *testing.T, body string) string {
-	matches := csrfRGXExp.FindSubmatch([]byte(body))
+	matches := csrfRGXExp.FindStringSubmatch(body)
 	if len(matches) < 2 {
 		t.Fatal("no csrf token found in body")
 	}
