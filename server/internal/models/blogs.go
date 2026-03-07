@@ -15,6 +15,12 @@ type Blog struct {
 	Expires   time.Time `json:"expires"`
 }
 
+type BlogModelInterface interface {
+	Insert(title string, content string, author string, expires int) (int, error)
+	Get(id int) (*Blog, error)
+	Latest() ([]*Blog, error)
+}
+
 type BlogModel struct {
 	DB *sql.DB
 }
