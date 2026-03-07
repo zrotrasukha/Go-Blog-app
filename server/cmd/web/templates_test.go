@@ -26,7 +26,6 @@ func TestHumanDate(t *testing.T) {
 		{
 			name: "IST",
 			tm:   time.Date(2026, 3, 6, 3, 0, 0, 0, time.FixedZone("IST", 5*60*60+30*60)),
-			// 02 Jan 2006 at 15:04
 			want: "05 Mar 2026 at 21:30",
 		},
 	}
