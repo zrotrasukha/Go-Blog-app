@@ -21,8 +21,8 @@ import (
 type application struct {
 	errorlog       *log.Logger
 	infolog        *log.Logger
-	blogs          *models.BlogModel
-	users          *models.UserModel
+	blogs          models.BlogModelInterface
+	users          models.UserModelInterface
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
