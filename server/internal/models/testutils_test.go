@@ -4,10 +4,21 @@ import (
 	"database/sql"
 	"os"
 	"testing"
+
+	"github.com/joho/godotenv"
 )
 
 func newTestDB(t *testing.T) *sql.DB {
-	db, err := sql.Open("postgres", "postgresql://test_web:Secretha%21j1@ep-crimson-forest-aibwq0ek-pooler.c-4.us-east-1.aws.neon.tech/test_blogs?sslmode=require&channel_binding=require ")
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	test_dsn := os.Getenv("TEST_DSN")
+	if test_dsn == "" {
+		t.Fatal("TEST_DSN environment variable is not set")
+	}
+	db, err := sql.Open("postgres", test_dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
