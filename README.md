@@ -4,6 +4,19 @@ A production-style, server-rendered blog platform written in Go.
 
 This project is intentionally backend-first: it demonstrates clean HTTP architecture, secure authentication flows, PostgreSQL data modeling, middleware composition, and meaningful automated testing. It is designed to be easy to read, easy to extend, and strong enough to showcase in interviews.
 
+## Screenshots
+### Home
+!["./docs/go-blog-home.png"]
+![Home Page](docs/hme.png)
+### View Post
+!["./docs/go-blog-view.png"]
+### Create Post
+!["./docs/go-blog-create.png"]
+### Signup
+!["./docs/go-blog-signup.png"]
+### Login
+!["./docs/go-blog-login.png"]
+
 ## Why This Project Stands Out
 
 - Clean layered architecture: handlers, middleware, models, templates, and shared validation utilities are separated by responsibility.
@@ -181,17 +194,6 @@ What is covered:
 - Middleware header/security behavior (`cmd/web/middleware_test.go`)
 - Template date formatting helper (`cmd/web/templates_test.go`)
 - Model integration checks against a real test DB (`internal/models/users_test.go`)
-
-## Interview Talking Points
-
-If you are presenting this project, these are the strongest engineering points to discuss:
-
-1. Middleware-first request lifecycle and why each middleware exists.
-2. Session architecture with database-backed store and token rotation.
-3. Validation strategy (field + non-field errors) and server-side rendering feedback loop.
-4. Use of interfaces (`BlogModelInterface`, `UserModelInterface`) to enable fast handler tests with mocks.
-5. Security posture: CSRF, secure headers, password hashing, and protected-route cache controls.
-6. Why server-rendered Go templates can be a pragmatic choice for internal tools or MVPs.
 
 ## Potential Next Enhancements
 
