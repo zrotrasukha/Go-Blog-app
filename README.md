@@ -5,17 +5,21 @@ A production-style, server-rendered blog platform written in Go.
 This project is intentionally backend-first: it demonstrates clean HTTP architecture, secure authentication flows, PostgreSQL data modeling, middleware composition, and meaningful automated testing. It is designed to be easy to read, easy to extend, and strong enough to showcase in interviews.
 
 ## Screenshots
+
 ### Home
-!["./docs/go-blog-home.png"]
-![Home Page](docs/hme.png)
+![Home](docs/go-blog-home.png)
+
 ### View Post
-!["./docs/go-blog-view.png"]
+![View Post](docs/go-blog-view.png)
+
 ### Create Post
-!["./docs/go-blog-create.png"]
+![Create Post](docs/go-blog-create.png)
+
 ### Signup
-!["./docs/go-blog-signup.png"]
+![Signup](docs/go-blog-signup.png)
+
 ### Login
-!["./docs/go-blog-login.png"]
+![Login](docs/go-blog-login.png)
 
 ## Why This Project Stands Out
 
